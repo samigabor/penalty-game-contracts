@@ -25,6 +25,16 @@ contract CommunityRegistryTest is Test {
     address public member = makeAddr("member");
     address public admin = makeAddr("admin");
 
+    uint256 tokenId;
+
+    modifier createAndAssignTokenToMember() {
+        vm.startPrank(admin);
+        tokenId = communityRegistry.createCommunityToken(communityToken);
+        communityRegistry.assignTokenToMember(communityToken, member, tokenId);
+        vm.stopPrank();
+        _;
+    }
+
     function setUp() public {
         deployer = new DeployPenaltyGame();
         (communityToken, tokenTransferRequest, tokenPool, communityRegistry, ) = deployer.run(admin);
@@ -32,28 +42,37 @@ contract CommunityRegistryTest is Test {
 
     function testCreateCommunityToken() public {
         vm.prank((admin));
-        uint256 tokenId = communityRegistry.createCommunityToken(communityToken);
+        tokenId = communityRegistry.createCommunityToken(communityToken);
         assertEq(communityToken.ownerOf(tokenId), address(communityRegistry));
     }
 
-    function testAssignTokenToMember() public {
-        vm.startPrank((admin));
-        uint256 tokenId = communityRegistry.createCommunityToken(communityToken);
-        communityRegistry.assignTokenToMember(communityToken, member, tokenId);
-        vm.stopPrank();
+    function testAssignTokenToMember() public createAndAssignTokenToMember {
         // member is still the owner of the token, but is in the community anymore
         assertEq(communityToken.ownerOf(tokenId), member);
         assertEq(communityRegistry.isInCommunity(member, communityToken), true);
     }
 
-    function testRemoveMemberFromCommunity() public {
-        vm.startPrank((admin));
-        uint256 tokenId = communityRegistry.createCommunityToken(communityToken);
-        communityRegistry.assignTokenToMember(communityToken, member, tokenId);
+    function testRemoveMemberFromCommunity() public createAndAssignTokenToMember {
+        vm.prank(admin);
         communityRegistry.removeMemberFromCommunity(member, communityToken);
-        vm.stopPrank();
         // member is still the owner of the token, but is not in the community anymore
         assertEq(communityToken.ownerOf(tokenId), member);
         assertEq(communityRegistry.isInCommunity(member, communityToken), false);
+    }
+
+    function testMemberCanSendTokenToPool() public createAndAssignTokenToMember {
+        vm.startPrank(member);
+        assertEq(communityToken.ownerOf(tokenId), member);
+        communityToken.safeTransferFrom(member, address(tokenPool), tokenId);
+        // member is not the owner of the token anymore
+        assertEq(communityToken.ownerOf(tokenId), address(tokenPool));
+    }
+
+    function testBurnCommunityToken() public createAndAssignTokenToMember {
+        vm.startPrank(member);
+        communityToken.safeTransferFrom(member, address(tokenPool), tokenId);
+
+        vm.startPrank(admin);
+        communityRegistry.burnCommunityToken(communityToken, tokenId);
     }
 }
