@@ -23,6 +23,7 @@ contract CommunityRegistryTest is Test {
     CommunityRegistry communityRegistry; // CommunityRegistry is the owner of CommunityToken, TokenTransferRequest, and TokenPool
 
     address public member = makeAddr("member");
+    address public other = makeAddr("other");
     address public admin = makeAddr("admin");
 
     uint256 tokenId;
@@ -74,6 +75,22 @@ contract CommunityRegistryTest is Test {
         communityToken.safeTransferFrom(member, address(tokenPool), tokenId);
         // member is not the owner of the token anymore
         assertEq(communityToken.ownerOf(tokenId), address(tokenPool));
+    }
+
+    function testMemberCanTransferTokenToOther() public createAndAssignTokenToMember {
+        vm.startPrank(member);
+        assertEq(communityToken.ownerOf(tokenId), member);
+        communityToken.transferFrom(member, other, tokenId);
+        // member is not the owner of the token anymore
+        assertEq(communityToken.ownerOf(tokenId), other);
+    }
+
+    function testMemberCanSafeTransferTokenToOther() public createAndAssignTokenToMember {
+        vm.startPrank(member);
+        assertEq(communityToken.ownerOf(tokenId), member);
+        communityToken.safeTransferFrom(member, other, tokenId);
+        // member is not the owner of the token anymore
+        assertEq(communityToken.ownerOf(tokenId), other);
     }
 
     function testBurnCommunityToken() public createAndAssignTokenToMember {
