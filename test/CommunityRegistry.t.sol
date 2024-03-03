@@ -61,43 +61,67 @@ contract CommunityRegistryTest is Test {
         assertEq(communityRegistry.isInCommunity(member, communityToken), false);
     }
 
-    function testMemberCanTransferTokenToPool() public createAndAssignTokenToMember {
-        vm.startPrank(member);
-        assertEq(communityToken.ownerOf(tokenId), member);
+    function testMemberCanTransferApprovedTokenToPool() public createAndAssignTokenToMember {
+        vm.prank(member);
+        communityToken.initiateTransfer(member, address(tokenPool), tokenId);
+
+        vm.prank(other);
+        communityToken.approveTransfer(tokenId);
+
+        vm.prank(member);
         communityToken.transferFrom(member, address(tokenPool), tokenId);
-        // member is not the owner of the token anymore
-        assertEq(communityToken.ownerOf(tokenId), address(tokenPool));
+    }
+
+    function testMemberCanNotTransferNonApprovedTokenToPool() public createAndAssignTokenToMember {
+        vm.startPrank(member);
+        communityToken.initiateTransfer(member, address(tokenPool), tokenId);
+        vm.expectRevert(CommunityToken.NotApprovedForTransfer.selector);
+        communityToken.transferFrom(member, address(tokenPool), tokenId);
+        vm.stopPrank();
     }
 
     function testMemberCanSafeTransferTokenToPool() public createAndAssignTokenToMember {
-        vm.startPrank(member);
-        assertEq(communityToken.ownerOf(tokenId), member);
+        vm.prank(member);
+        communityToken.initiateTransfer(member, address(tokenPool), tokenId);
+        vm.prank(other);
+        communityToken.approveTransfer(tokenId);
+        vm.prank(member);
         communityToken.safeTransferFrom(member, address(tokenPool), tokenId);
         // member is not the owner of the token anymore
         assertEq(communityToken.ownerOf(tokenId), address(tokenPool));
     }
 
     function testMemberCanTransferTokenToOther() public createAndAssignTokenToMember {
-        vm.startPrank(member);
-        assertEq(communityToken.ownerOf(tokenId), member);
+        vm.prank(member);
+        communityToken.initiateTransfer(member, other, tokenId);
+        vm.prank(other);
+        communityToken.approveTransfer(tokenId);
+        vm.prank(member);
         communityToken.transferFrom(member, other, tokenId);
         // member is not the owner of the token anymore
         assertEq(communityToken.ownerOf(tokenId), other);
     }
 
     function testMemberCanSafeTransferTokenToOther() public createAndAssignTokenToMember {
-        vm.startPrank(member);
-        assertEq(communityToken.ownerOf(tokenId), member);
+        vm.prank(member);
+        communityToken.initiateTransfer(member, other, tokenId);
+        vm.prank(other);
+        communityToken.approveTransfer(tokenId);
+        vm.prank(member);
         communityToken.safeTransferFrom(member, other, tokenId);
         // member is not the owner of the token anymore
         assertEq(communityToken.ownerOf(tokenId), other);
     }
 
     function testBurnCommunityToken() public createAndAssignTokenToMember {
-        vm.startPrank(member);
+        vm.prank(member);
+        communityToken.initiateTransfer(member, address(tokenPool), tokenId);
+        vm.prank(other);
+        communityToken.approveTransfer(tokenId);
+        vm.prank(member);
         communityToken.safeTransferFrom(member, address(tokenPool), tokenId);
 
-        vm.startPrank(admin);
+        vm.prank(admin);
         communityRegistry.burnCommunityToken(communityToken, tokenId);
     }
 
@@ -105,5 +129,25 @@ contract CommunityRegistryTest is Test {
         vm.prank(member);
         communityToken.burn(tokenId);
         // TBD: Enforce "only burn from pool" mechanism!?
+    }
+
+    // CommunityToken tests
+
+    function testInitiateTransfer() public createAndAssignTokenToMember {
+        vm.startPrank(member);
+        communityToken.initiateTransfer(member, other, tokenId);
+        assertEq(communityToken.ownerOf(tokenId), member);
+        assertEq(communityToken.isApproved(tokenId), false);
+    }
+
+    function testApproveTransfer() public createAndAssignTokenToMember {
+        vm.prank(member);
+        communityToken.initiateTransfer(member, other, tokenId);
+
+        vm.prank(other);
+        communityToken.approveTransfer(tokenId);
+
+        assertEq(communityToken.ownerOf(tokenId), member);
+        assertEq(communityToken.isApproved(tokenId), true);
     }
 }
