@@ -22,8 +22,8 @@ contract DeployPenaltyGame is Script {
         communityRegistry = new CommunityRegistry(admin);
 
         communityToken.transferOwnership(address(communityRegistry));
-        tokenTransferRequest.transferOwnership(address(communityToken));
-        tokenPool.transferOwnership(address(communityToken));
+        tokenTransferRequest.transferOwnership(address(communityRegistry));
+        tokenPool.transferOwnership(address(communityRegistry));
 
         vm.stopBroadcast();
 
