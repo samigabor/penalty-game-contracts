@@ -60,7 +60,15 @@ contract CommunityRegistryTest is Test {
         assertEq(communityRegistry.isInCommunity(member, communityToken), false);
     }
 
-    function testMemberCanSendTokenToPool() public createAndAssignTokenToMember {
+    function testMemberCanTransferTokenToPool() public createAndAssignTokenToMember {
+        vm.startPrank(member);
+        assertEq(communityToken.ownerOf(tokenId), member);
+        communityToken.transferFrom(member, address(tokenPool), tokenId);
+        // member is not the owner of the token anymore
+        assertEq(communityToken.ownerOf(tokenId), address(tokenPool));
+    }
+
+    function testMemberCanSafeTransferTokenToPool() public createAndAssignTokenToMember {
         vm.startPrank(member);
         assertEq(communityToken.ownerOf(tokenId), member);
         communityToken.safeTransferFrom(member, address(tokenPool), tokenId);
