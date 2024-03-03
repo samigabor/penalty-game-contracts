@@ -91,6 +91,7 @@ contract CommunityRegistry is Ownable {
      */
     function assignTokenToMember(CommunityToken community, address member, uint256 tokenId) public onlyOwner onlyNew(member, community) {
         memberships[member][community] = tokenId;
+        community.approveTransfer(tokenId);
         community.safeTransferFrom(address(this), member, tokenId);
         emit MemberAssignedToCommunity(member, community, tokenId);
     }
