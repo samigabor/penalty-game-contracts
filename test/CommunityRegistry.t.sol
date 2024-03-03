@@ -100,4 +100,10 @@ contract CommunityRegistryTest is Test {
         vm.startPrank(admin);
         communityRegistry.burnCommunityToken(communityToken, tokenId);
     }
+
+    function testRevertBurnByNonPool() public createAndAssignTokenToMember {
+        vm.prank(member);
+        communityToken.burn(tokenId);
+        // TBD: Enforce "only burn from pool" mechanism!?
+    }
 }
