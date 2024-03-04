@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 import {CommunityToken} from "./CommunityToken.sol";
 import {TokenPool} from "./TokenPool.sol";
+import {RequestStatus} from "./TokenTransferRequest.sol";
 
 // Order Layout
 // Type declarations
@@ -91,7 +92,11 @@ contract CommunityRegistry is Ownable {
      */
     function assignTokenToMember(CommunityToken community, address member, uint256 tokenId) public onlyOwner onlyNew(member, community) {
         memberships[member][community] = tokenId;
-        community.approveTransfer(tokenId);
+
+        // TODO: remove the need for request update if called from this contract
+        community.updateRequestStatus(tokenId, RequestStatus.Pending, member);
+        community.updateRequestStatus(tokenId, RequestStatus.Approved, address(0));
+
         community.safeTransferFrom(address(this), member, tokenId);
         emit MemberAssignedToCommunity(member, community, tokenId);
     }

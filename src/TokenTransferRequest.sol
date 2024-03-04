@@ -1,47 +1,57 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+enum RequestStatus {
+    // Inactive,
+    Pending,
+    Approved,
+    Completed
+}
+
+struct TransferRequest {
+    address from;
+    address to;
+    RequestStatus status;
+}
+
 /**
  * @title TokenTransferRequest
- * @notice The contract is used to manage token transfer state. Only approved requests can be transferred.
+ * @notice The contract is used to manage token transfer state. 
+ * Only pending requests can be approved.
+ * Only approved requests can be transferred.
  */
 contract TokenTransferRequest {
-    enum RequestStatus { Pending, Approved, Completed }
 
-    struct TransferRequest {
-        address from;
-        address to;
-        RequestStatus status;
+    mapping(uint256 => TransferRequest) internal _transferRequests;
+
+    event UpdateTransferRequest(uint256 tokenId, address from, address to, RequestStatus status);
+
+    error OnlyPendingRequestCanBeApproved(uint256 tokenId, RequestStatus status);
+    error OnlyApprovedRequestCanBeCompleted(uint256 tokenId, RequestStatus status);
+    error TransferRequestNotApproved(uint256 tokenId);
+    error TransferRequestToZeroAddress();
+
+    modifier onlyApprovedRequest(uint256 tokenId) {
+        if (_transferRequests[tokenId].status != RequestStatus.Approved) {
+            revert TransferRequestNotApproved(tokenId);
+        }
+        _;
     }
 
-    mapping(uint256 => TransferRequest) private _transferRequests;
+    function _updateRequestStatus(uint256 tokenId, RequestStatus status, address to) internal {
+        if (status == RequestStatus.Pending) {
+            if (to == address(0)) revert TransferRequestToZeroAddress();
+            _transferRequests[tokenId].from = msg.sender;
+            _transferRequests[tokenId].to = to;
+        }
+        if (status == RequestStatus.Approved && _transferRequests[tokenId].status != RequestStatus.Pending) {
+            revert OnlyPendingRequestCanBeApproved(tokenId, status);
+        }
+        if (status == RequestStatus.Completed && _transferRequests[tokenId].status != RequestStatus.Approved) {
+            revert OnlyApprovedRequestCanBeCompleted(tokenId, status);
+        }
 
-    error NotPendingRequest(uint256 tokenId);
-    error NotApprovedRequest(uint256 tokenId);
-
-    function _initiateTransfer(address from, address to, uint256 tokenId) internal {
-        _transferRequests[tokenId] = TransferRequest(from, to, RequestStatus.Pending);
-    }
-
-    function _approveTransfer(uint256 tokenId) public {
-        TransferRequest storage request = _transferRequests[tokenId];
-        if (request.status != RequestStatus.Pending) revert NotPendingRequest(tokenId);
-
-        request.status = RequestStatus.Approved;
-    }
-
-    function _executeTransfer(uint256 tokenId) internal {
-        TransferRequest storage request = _transferRequests[tokenId];
-        if (request.status != RequestStatus.Approved) revert NotApprovedRequest(tokenId);
-
-        request.status = RequestStatus.Completed;
-    }
-
-    function isApproved(uint256 tokenId) public view returns (bool) {
-        return _transferRequests[tokenId].status == RequestStatus.Approved;
-    }
-
-    function getRequestStatus(uint256 tokenId) public view returns (RequestStatus) {
-        return _transferRequests[tokenId].status;
+        _transferRequests[tokenId].status = status;
+        emit UpdateTransferRequest(tokenId, _transferRequests[tokenId].from, _transferRequests[tokenId].to, status);
     }
 }
