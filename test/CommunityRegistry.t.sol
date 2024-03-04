@@ -136,6 +136,12 @@ contract CommunityRegistryTest is Test {
         communityToken.completeTransferRequest(tokenId);
     }
 
+    function testRevertTransferRequestIfNotInitiated() public createAndAssignTokenToMember {
+        vm.prank(approver);
+        vm.expectRevert(); // TODO: Encode revert message
+        communityToken.approveTransferRequest(tokenId);
+    }
+
     function testRevertTransferRequestIfNotApproved() public createAndAssignTokenToMember {
         vm.startPrank(from);
         communityToken.initiateTransferRequest(to, tokenId);
