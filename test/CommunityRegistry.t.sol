@@ -34,14 +34,14 @@ contract CommunityRegistryTest is Test {
 
     function _createAndAssignTokenTo(address member) private {
         vm.startPrank(admin);
-        tokenId = communityRegistry.createCommunityToken(communityToken);
+        tokenId = communityRegistry.createCommunityToken(address(communityToken));
         communityRegistry.assignTokenToMember(communityToken, member, tokenId);
         vm.stopPrank();
     }
 
     function setUp() public {
         deployer = new DeployPenaltyGame();
-        (communityToken, tokenTransferRequest, tokenPool, communityRegistry, ) = deployer.run(admin);
+        (communityToken, tokenTransferRequest, tokenPool, communityRegistry, ) = deployer.run();
         _createAndAssignTokenTo(approver);
     }
 
@@ -49,9 +49,17 @@ contract CommunityRegistryTest is Test {
     // Community Registry               //
     //////////////////////////////////////
 
+    function testIsInCommunity() public createAndAssignTokenToMember {
+        assertEq(communityRegistry.isInCommunity(from, communityToken), true);
+    }
+
+    function testIsNotInCommunity() public {
+        assertEq(communityRegistry.isInCommunity(from, communityToken), false);
+    }
+
     function testCreateCommunityToken() public {
         vm.prank((admin));
-        tokenId = communityRegistry.createCommunityToken(communityToken);
+        tokenId = communityRegistry.createCommunityToken(address(communityToken));
         assertEq(communityToken.ownerOf(tokenId), address(communityRegistry));
     }
 
