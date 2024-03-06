@@ -16,9 +16,10 @@
 - easy management of the registry using Ownable access control with easy migration to a role based access control
 - the `safe` version of the methods is used for token management (mint & transfer). Ensures tokens will not get accidentally lost
 
-
-- communityToken: contract CommunityToken 0x37E7F7e81f3De777da0a30cB27660c66eAEC0e0B
-- tokenTransferRequest: contract TokenTransferRequest 0x44E07b18647249550bf2597Dba37906f83FC05e7
-- tokenPool: contract TokenPool 0xD2c29b02DcF91BC05736A4164940BeE8A3e06277
-- communityRegistry: contract CommunityRegistry 0xE25CeC204eB0786D4840FaF336a04f92e2D89d59
-- helperConfig: contract HelperConfig 0xC7f2Cf4845C6db0e1a1e91ED41Bcd0FcC1b0E141
+## Deployed to Sepolia
+- address constant ADMIN_ADDRESS = 0xf13e5F8933976bfdaA31efdB10c93BE23525Ddc3;
+- address constant COMMUNITY_TOKEN_ADDRESS = [0xbCbA2AeEAC9FD0506F8E2B6D951C1E870CC447c8](https://sepolia.etherscan.io/address/0xbCbA2AeEAC9FD0506F8E2B6D951C1E870CC447c8#code);
+- address constant TOKEN_POOL_ADDRESS = [0x3e488DC02DD6E8B6e6Ff3D2Acf6506Bf3a58bB02](https://sepolia.etherscan.io/address/0x3e488DC02DD6E8B6e6Ff3D2Acf6506Bf3a58bB02#code);
+- address constant COMMUNITY_REGISTRY_ADDRESS = [0xDC98a83A93895999d9Ce6336932Ef99fE6a87038](https://sepolia.etherscan.io/address/0xDC98a83A93895999d9Ce6336932Ef99fE6a87038#code);
+- address constant TRANSFER_REQUEST_TOKEN_ADDRESS = [0xE2BaDfc491fe719ae905d39FfC36DA2D20b495d6](https://sepolia.etherscan.io/address/0xE2BaDfc491fe719ae905d39FfC36DA2D20b495d6#code);
+- address constant HELPER_CONFIG_ADDRESS = [0xC7f2Cf4845C6db0e1a1e91ED41Bcd0FcC1b0E141](https://sepolia.etherscan.io/address/0xC7f2Cf4845C6db0e1a1e91ED41Bcd0FcC1b0E141#code);
