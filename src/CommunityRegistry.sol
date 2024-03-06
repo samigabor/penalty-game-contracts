@@ -37,7 +37,7 @@ contract CommunityRegistry is Ownable {
     TokenPool public tokenPool;
     mapping(address member => mapping(CommunityToken community => uint256 tokenId)) private memberships;
 
-    event CommunityTokenCreated(CommunityToken community, uint256 tokenId);
+    event CommunityTokenCreated(address community, uint256 tokenId);
     event MemberAssignedToCommunity(address member, CommunityToken community, uint256 tokenId);
     event MemberRemovedFromCommunity(address member, CommunityToken community, uint256 tokenId);
 
@@ -77,8 +77,8 @@ contract CommunityRegistry is Ownable {
      * @param community The community token contract
      * @return The id of the created token
      */
-    function createCommunityToken(CommunityToken community) public onlyOwner returns (uint256){
-        uint256 tokenId = community.safeMint(address(this), "uri");
+    function createCommunityToken(address community) public onlyOwner returns (uint256){
+        uint256 tokenId = CommunityToken(community).safeMint(address(this), "uri");
         emit CommunityTokenCreated(community, tokenId);
         return tokenId;
     }
