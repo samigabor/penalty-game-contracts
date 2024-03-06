@@ -15,13 +15,22 @@ contract HelperConfig is Script {
     Config public config;
 
     constructor() {
-        if (block.chainid == 11155111) {
+        if (block.chainid == 80001) {
+            config = getMumbaiConfig();
+            console.log("Mumbai config: %s", config.deployKey);
+        } else if (block.chainid == 11155111) {
             config = getSepoliaConfig();
             console.log("Sepolia config: %s", config.deployKey);
         } else {
             config = getOrCreateAnvilConfig();
             console.log("Anvil config: %s", config.deployKey);
         }
+    }
+
+    function getMumbaiConfig() public view returns (Config memory) {
+        return Config({
+            deployKey: vm.envUint("PRIVATE_KEY")
+        });
     }
 
     function getSepoliaConfig() public view returns (Config memory) {
