@@ -9,14 +9,13 @@ import {CommunityRegistry} from "../src/CommunityRegistry.sol";
 import {TokenPool} from "../src/TokenPool.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
 
-address constant ADMIN_ADDRESS = 0xf13e5F8933976bfdaA31efdB10c93BE23525Ddc3;
-
 address constant COMMUNITY_TOKEN_ADDRESS = 0xbCbA2AeEAC9FD0506F8E2B6D951C1E870CC447c8;
 address constant TOKEN_POOL_ADDRESS = 0x3e488DC02DD6E8B6e6Ff3D2Acf6506Bf3a58bB02;
 address constant COMMUNITY_REGISTRY_ADDRESS = 0xDC98a83A93895999d9Ce6336932Ef99fE6a87038;
 
-address constant TRANSFER_REQUEST_TOKEN_ADDRESS = 0xE2BaDfc491fe719ae905d39FfC36DA2D20b495d6;
-address constant HELPER_CONFIG_ADDRESS = 0xC7f2Cf4845C6db0e1a1e91ED41Bcd0FcC1b0E141;
+// deployed but not used in this script
+// address constant TRANSFER_REQUEST_TOKEN_ADDRESS = 0xE2BaDfc491fe719ae905d39FfC36DA2D20b495d6;
+// address constant HELPER_CONFIG_ADDRESS = 0xC7f2Cf4845C6db0e1a1e91ED41Bcd0FcC1b0E141;
 
 /**
  * @dev Deploy to anvil
@@ -70,13 +69,13 @@ contract DeployPenaltyGame is Script {
 
     function run() external returns (CommunityToken communityToken, TokenTransferRequest tokenTransferRequest, TokenPool tokenPool, CommunityRegistry communityRegistry, HelperConfig helperConfig) {
         helperConfig = new HelperConfig();
-        (uint256 deployerKey) = helperConfig.config();
+        (uint256 deployerKey, address admin, , , ) = helperConfig.config();
         
         vm.startBroadcast(deployerKey);
         communityToken = new CommunityToken("Penalty Game", "PG");
         tokenTransferRequest = new TokenTransferRequest();
         tokenPool = new TokenPool();
-        communityRegistry = new CommunityRegistry(tokenPool, ADMIN_ADDRESS);
+        communityRegistry = new CommunityRegistry(tokenPool, admin);
 
         communityToken.transferOwnership(address(communityRegistry));
         tokenPool.transferOwnership(address(communityRegistry));

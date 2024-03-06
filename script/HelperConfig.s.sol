@@ -9,6 +9,10 @@ import {console} from "forge-std/Test.sol";
 contract HelperConfig is Script {
     struct Config {
         uint256 deployKey;
+        address admin;
+        address from;
+        address to;
+        address approver;
     }
     uint256 public constant ANVIL_KEY = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
 
@@ -29,19 +33,31 @@ contract HelperConfig is Script {
 
     function getMumbaiConfig() public view returns (Config memory) {
         return Config({
-            deployKey: vm.envUint("PRIVATE_KEY")
+            deployKey: vm.envUint("PRIVATE_KEY"),
+            admin: 0xf13e5F8933976bfdaA31efdB10c93BE23525Ddc3,
+            from: 0x90F010Dd9408575985da1C14dBD3920BB0FFa7b6,
+            to: 0x7965f643967aB3cDe072cb45dc9AFAA08d68ABdf,
+            approver: 0x06E91E93f0ae2B12AD00C7AC430D167767Eb1085
         });
     }
 
     function getSepoliaConfig() public view returns (Config memory) {
         return Config({
-            deployKey: vm.envUint("PRIVATE_KEY")
+            deployKey: vm.envUint("PRIVATE_KEY"),
+            admin: 0xf13e5F8933976bfdaA31efdB10c93BE23525Ddc3,
+            from: 0x90F010Dd9408575985da1C14dBD3920BB0FFa7b6,
+            to: 0x7965f643967aB3cDe072cb45dc9AFAA08d68ABdf,
+            approver: 0x06E91E93f0ae2B12AD00C7AC430D167767Eb1085
         });
     }
 
-    function getOrCreateAnvilConfig() public pure returns (Config memory) {
+    function getOrCreateAnvilConfig() public returns (Config memory) {
         return Config({
-            deployKey: ANVIL_KEY
+            deployKey: ANVIL_KEY,
+            admin: makeAddr("admin"),
+            from: makeAddr("member1"),
+            to: makeAddr("member2"),
+            approver: makeAddr("member3")
         });
     }
 }

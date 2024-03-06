@@ -8,6 +8,7 @@ import {CommunityToken} from "../src/CommunityToken.sol";
 import {TokenTransferRequest} from "../src/TokenTransferRequest.sol";
 import {CommunityRegistry} from "../src/CommunityRegistry.sol";
 import {TokenPool} from "../src/TokenPool.sol";
+import {HelperConfig} from "../script/HelperConfig.s.sol";
 
 /**
  * forge test --fork-url $RPC_URL
@@ -19,11 +20,12 @@ contract CommunityRegistryTest is Test {
     TokenTransferRequest tokenTransferRequest;
     TokenPool tokenPool;
     CommunityRegistry communityRegistry; // CommunityRegistry is the owner of CommunityToken, TokenTransferRequest, and TokenPool
+    HelperConfig helperConfig;
 
-    address public from = makeAddr("from");
-    address public to = makeAddr("to");
-    address public approver = makeAddr("approver");
-    address public admin = makeAddr("admin");
+    address public from;
+    address public to;
+    address public approver;
+    address public admin;
 
     uint256 tokenId;
 
@@ -41,7 +43,8 @@ contract CommunityRegistryTest is Test {
 
     function setUp() public {
         deployer = new DeployPenaltyGame();
-        (communityToken, tokenTransferRequest, tokenPool, communityRegistry, ) = deployer.run();
+        (communityToken, tokenTransferRequest, tokenPool, communityRegistry, helperConfig) = deployer.run();
+        (, admin, from, to, approver) = helperConfig.config();
         _createAndAssignTokenTo(approver);
     }
 
