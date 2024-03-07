@@ -9,12 +9,12 @@ import {CommunityRegistry} from "../src/CommunityRegistry.sol";
 import {TokenPool} from "../src/TokenPool.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
 
-address constant COMMUNITY_TOKEN_ADDRESS = 0xbCbA2AeEAC9FD0506F8E2B6D951C1E870CC447c8;
-address constant TOKEN_POOL_ADDRESS = 0x3e488DC02DD6E8B6e6Ff3D2Acf6506Bf3a58bB02;
-address constant COMMUNITY_REGISTRY_ADDRESS = 0xDC98a83A93895999d9Ce6336932Ef99fE6a87038;
+address constant COMMUNITY_TOKEN_ADDRESS = 0x121fe9DA9be9fC948bF56F93F99c13ccb2cFE36d;
+address constant TOKEN_POOL_ADDRESS = 0x4432C7E4972a84E20E1FB0D899e61287c522e2dB;
+address constant COMMUNITY_REGISTRY_ADDRESS = 0xd359AA2364b1F3716dc1CC96bb2Fa4ef19bc97d4;
 
 // deployed but not used in this script
-// address constant TRANSFER_REQUEST_TOKEN_ADDRESS = 0xE2BaDfc491fe719ae905d39FfC36DA2D20b495d6;
+// address constant TRANSFER_REQUEST_TOKEN_ADDRESS = 0x29BC83517ba99dB62e44d4D2dB3BF60093b17110;
 // address constant HELPER_CONFIG_ADDRESS = 0xC7f2Cf4845C6db0e1a1e91ED41Bcd0FcC1b0E141;
 
 /**
@@ -23,11 +23,12 @@ address constant COMMUNITY_REGISTRY_ADDRESS = 0xDC98a83A93895999d9Ce6336932Ef99f
     --rpc-url http://127.0.0.1:8545 \
     --broadcast
 
- * @dev Script to deploy all contract and transfer ownership to CommunityRegistry:
+ * @dev Script to deploy all contracts and transfer ownership to CommunityRegistry:
     forge script script/DeployPenaltyGame.s.sol \
     --rpc-url $RPC_URL_SEPOLIA \
     --optimizer-runs 200 \
     --broadcast \
+    --watch \
     --private-key=$PRIVATE_KEY
 
  * @dev Manual deployment example:
@@ -42,10 +43,10 @@ address constant COMMUNITY_REGISTRY_ADDRESS = 0xDC98a83A93895999d9Ce6336932Ef99f
     forge verify-contract \
     --chain-id 11155111 \
     --watch \
-    --constructor-args $(cast abi-encode "constructor(string,string)" "Penalty Game" "PG") \
+    --constructor-args $(cast abi-encode "constructor(string,string,address)" "Penalty Game" "PG" 0xd359AA2364b1F3716dc1CC96bb2Fa4ef19bc97d4) \
     --etherscan-api-key $ETHERSCAN_API_KEY \
     --optimizer-runs 200 \
-    0xbCbA2AeEAC9FD0506F8E2B6D951C1E870CC447c8 \
+    0x121fe9DA9be9fC948bF56F93F99c13ccb2cFE36d \
     src/CommunityToken.sol:CommunityToken
 
     forge verify-contract \
@@ -53,16 +54,16 @@ address constant COMMUNITY_REGISTRY_ADDRESS = 0xDC98a83A93895999d9Ce6336932Ef99f
     --watch \
     --etherscan-api-key $ETHERSCAN_API_KEY \
     --optimizer-runs 200 \
-    0x3e488DC02DD6E8B6e6Ff3D2Acf6506Bf3a58bB02 \
+    0x4432C7E4972a84E20E1FB0D899e61287c522e2dB \
     src/TokenPool.sol:TokenPool
 
     forge verify-contract \
     --chain-id 11155111 \
     --watch \
-    --constructor-args $(cast abi-encode "constructor(address,address)" 0x3e488DC02DD6E8B6e6Ff3D2Acf6506Bf3a58bB02 0xf13e5F8933976bfdaA31efdB10c93BE23525Ddc3) \
+    --constructor-args $(cast abi-encode "constructor(address,address)" 0x4432C7E4972a84E20E1FB0D899e61287c522e2dB 0xf13e5F8933976bfdaA31efdB10c93BE23525Ddc3) \
     --etherscan-api-key $ETHERSCAN_API_KEY \
     --optimizer-runs 200 \
-    0xDC98a83A93895999d9Ce6336932Ef99fE6a87038 \
+    0xd359AA2364b1F3716dc1CC96bb2Fa4ef19bc97d4 \
     src/CommunityRegistry.sol:CommunityRegistry
  */
 contract DeployPenaltyGame is Script {
@@ -72,12 +73,10 @@ contract DeployPenaltyGame is Script {
         (uint256 deployerKey, address admin, , , ) = helperConfig.config();
         
         vm.startBroadcast(deployerKey);
-        communityToken = new CommunityToken("Penalty Game", "PG");
         tokenTransferRequest = new TokenTransferRequest();
         tokenPool = new TokenPool();
         communityRegistry = new CommunityRegistry(tokenPool, admin);
-
-        communityToken.transferOwnership(address(communityRegistry));
+        communityToken = communityRegistry.deployCommunityContract("Penalty Game", "PG");
         tokenPool.transferOwnership(address(communityRegistry));
 
         vm.stopBroadcast();

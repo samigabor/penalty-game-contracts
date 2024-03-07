@@ -17,9 +17,14 @@
 - the `safe` version of the methods is used for token management (mint & transfer). Ensures tokens will not get accidentally lost
 
 ## Deployed to Sepolia
-- address constant ADMIN_ADDRESS = 0xf13e5F8933976bfdaA31efdB10c93BE23525Ddc3;
-- address constant COMMUNITY_TOKEN_ADDRESS = [0xbCbA2AeEAC9FD0506F8E2B6D951C1E870CC447c8](https://sepolia.etherscan.io/address/0xbCbA2AeEAC9FD0506F8E2B6D951C1E870CC447c8#code);
-- address constant TOKEN_POOL_ADDRESS = [0x3e488DC02DD6E8B6e6Ff3D2Acf6506Bf3a58bB02](https://sepolia.etherscan.io/address/0x3e488DC02DD6E8B6e6Ff3D2Acf6506Bf3a58bB02#code);
-- address constant COMMUNITY_REGISTRY_ADDRESS = [0xDC98a83A93895999d9Ce6336932Ef99fE6a87038](https://sepolia.etherscan.io/address/0xDC98a83A93895999d9Ce6336932Ef99fE6a87038#code);
-- address constant TRANSFER_REQUEST_TOKEN_ADDRESS = [0xE2BaDfc491fe719ae905d39FfC36DA2D20b495d6](https://sepolia.etherscan.io/address/0xE2BaDfc491fe719ae905d39FfC36DA2D20b495d6#code);
+Core contracts:
+- address constant COMMUNITY_TOKEN_ADDRESS = [0x121fe9DA9be9fC948bF56F93F99c13ccb2cFE36d](https://sepolia.etherscan.io/address/0x121fe9DA9be9fC948bF56F93F99c13ccb2cFE36d#code);
+- address constant COMMUNITY_REGISTRY_ADDRESS = [0xd359AA2364b1F3716dc1CC96bb2Fa4ef19bc97d4](https://sepolia.etherscan.io/address/0xd359AA2364b1F3716dc1CC96bb2Fa4ef19bc97d4#code);
+
+Helper contracts:
+- address constant TOKEN_POOL_ADDRESS = [0x4432C7E4972a84E20E1FB0D899e61287c522e2dB](https://sepolia.etherscan.io/address/0x4432C7E4972a84E20E1FB0D899e61287c522e2dB#code);
+- address constant TRANSFER_REQUEST_TOKEN_ADDRESS = [0x29BC83517ba99dB62e44d4D2dB3BF60093b17110](https://sepolia.etherscan.io/address/0x29BC83517ba99dB62e44d4D2dB3BF60093b17110#code);
 - address constant HELPER_CONFIG_ADDRESS = [0xC7f2Cf4845C6db0e1a1e91ED41Bcd0FcC1b0E141](https://sepolia.etherscan.io/address/0xC7f2Cf4845C6db0e1a1e91ED41Bcd0FcC1b0E141#code);
+
+Registry owner:
+- address constant ADMIN_ADDRESS = `0xf13e5F8933976bfdaA31efdB10c93BE23525Ddc3`;
