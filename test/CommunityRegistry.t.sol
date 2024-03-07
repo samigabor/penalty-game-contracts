@@ -36,7 +36,7 @@ contract CommunityRegistryTest is Test {
 
     function _createAndAssignTokenTo(address member) private {
         vm.startPrank(admin);
-        tokenId = communityRegistry.createCommunityToken(address(communityToken));
+        tokenId = communityRegistry.mintCommunityToken(communityToken);
         communityRegistry.assignTokenToMember(communityToken, member, tokenId);
         vm.stopPrank();
     }
@@ -60,9 +60,9 @@ contract CommunityRegistryTest is Test {
         assertEq(communityRegistry.isInCommunity(from, communityToken), false);
     }
 
-    function testCreateCommunityToken() public {
+    function testMintCommunityToken() public {
         vm.prank((admin));
-        tokenId = communityRegistry.createCommunityToken(address(communityToken));
+        tokenId = communityRegistry.mintCommunityToken(communityToken);
         assertEq(communityToken.ownerOf(tokenId), address(communityRegistry));
     }
 
