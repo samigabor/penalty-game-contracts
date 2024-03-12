@@ -3,13 +3,13 @@
 ## Architecture
 
 - [CommunityToken](https://sepolia.etherscan.io/address/0x121fe9DA9be9fC948bF56F93F99c13ccb2cFE36d#code) contract allows members to transfer their tokens to other members or the pool contract for burning.
-- [CommunityRegistry](https://sepolia.etherscan.io/address/0xd359AA2364b1F3716dc1CC96bb2Fa4ef19bc97d4#code) contract allows admins to create and managinge communities.
+- [CommunityRegistry](https://sepolia.etherscan.io/address/0x1826c35d17DB4880Cc8Fe9477EC9e769F264D7A8#code) contract allows admins to create and managinge communities.
 - [TokenPool](https://sepolia.etherscan.io/address/0x4432C7E4972a84E20E1FB0D899e61287c522e2dB#code) contract allows burning tokens from a community
 - `TransferRequestToken` is a helper contract for the Community Token contract.
 
 ## Etherscan interaction:
 
-Admins will manage the communities through the Community Registry contract deployed on Sepolia at [0xd359AA2364b1F3716dc1CC96bb2Fa4ef19bc97d4](https://sepolia.etherscan.io/address/0xd359AA2364b1F3716dc1CC96bb2Fa4ef19bc97d4#code). 
+Admins will manage the communities through the Community Registry contract deployed on Sepolia at [0x1826c35d17DB4880Cc8Fe9477EC9e769F264D7A8](https://sepolia.etherscan.io/address/0x1826c35d17DB4880Cc8Fe9477EC9e769F264D7A8#code). 
 
 First step would be to create a community `deployCommunityContract(<name>, <symbol>)`, and the following actions are possible:
 - view deployed communities: `communities[<index>]`

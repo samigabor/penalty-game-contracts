@@ -39,6 +39,13 @@ address constant COMMUNITY_REGISTRY_ADDRESS = 0xd359AA2364b1F3716dc1CC96bb2Fa4ef
     --private-key $PRIVATE_KEY \
     src/CommunityToken.sol:CommunityToken
 
+    forge create \
+    --rpc-url $RPC_URL_SEPOLIA \
+    --optimizer-runs 200 \
+    --constructor-args 0x4432C7E4972a84E20E1FB0D899e61287c522e2dB 0xf13e5F8933976bfdaA31efdB10c93BE23525Ddc3 \
+    --private-key $PRIVATE_KEY \
+    src/CommunityRegistry.sol:CommunityRegistry
+
  * @dev Manual Verification required for each contract:
     forge verify-contract \
     --chain-id 11155111 \
@@ -63,7 +70,7 @@ address constant COMMUNITY_REGISTRY_ADDRESS = 0xd359AA2364b1F3716dc1CC96bb2Fa4ef
     --constructor-args $(cast abi-encode "constructor(address,address)" 0x4432C7E4972a84E20E1FB0D899e61287c522e2dB 0xf13e5F8933976bfdaA31efdB10c93BE23525Ddc3) \
     --etherscan-api-key $ETHERSCAN_API_KEY \
     --optimizer-runs 200 \
-    0xd359AA2364b1F3716dc1CC96bb2Fa4ef19bc97d4 \
+    0x1826c35d17DB4880Cc8Fe9477EC9e769F264D7A8 \
     src/CommunityRegistry.sol:CommunityRegistry
  */
 contract DeployPenaltyGame is Script {

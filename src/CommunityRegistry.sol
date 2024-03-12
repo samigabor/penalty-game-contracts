@@ -23,18 +23,25 @@ contract CommunityRegistry is Ownable {
     mapping(address member => mapping(CommunityToken community => uint256 tokenId)) private memberships;
     CommunityToken[] public communities;
     mapping(address => CommunityToken[]) public communitiesByAdmin; // one admin can manage multiple communities
+    mapping(CommunityToken => address) public communityAdmins;
 
     event CommunityDeployed(CommunityToken community, address admin);
     event CommunityTokenMinted(CommunityToken community, uint256 tokenId);
     event MemberAssignedToCommunity(address member, CommunityToken community, uint256 tokenId);
     event MemberRemovedFromCommunity(address member, CommunityToken community, uint256 tokenId);
 
+    error OnlyCommunityAdmin();
     error MemberAlreadyInCommunity(address member, CommunityToken community);
     error MemberNotInCommunity(address member, CommunityToken community);
     error CommunityRegistryDoesNotAcceptTokenTransfers();
 
     constructor(TokenPool _pool, address initialAdmin) Ownable(initialAdmin) { // address communityTemplate
         tokenPool = _pool;
+    }
+
+    modifier onlyCommunityAdmin(CommunityToken community, address admin) {
+        if (communityAdmins[community] != admin) revert OnlyCommunityAdmin();
+        _;
     }
 
     modifier onlyNew(address member, CommunityToken community) {
@@ -78,7 +85,13 @@ contract CommunityRegistry is Ownable {
         return _deployCommunityContract(name, symbol);
     }
 
-    function mintTokenToMember(CommunityToken community, address member) external onlyOwner {
+    /**
+     * @notice Mints a new token for a community and assigns it to a member
+     * The token is owned by the member
+     * @param community The community token contract
+     * @param member The address of the member to assign the token to
+     */
+    function mintTokenToMember(CommunityToken community, address member) external onlyCommunityAdmin(community, msg.sender) {
         uint256 tokenId = _mintCommunityToken(community);
         _assignTokenToMember(community, member, tokenId);
     }
@@ -139,6 +152,22 @@ contract CommunityRegistry is Ownable {
         return memberships[member][community] != 0;
     }
 
+    /**
+     * @notice Get community info
+     * @return All community token contracts, their names, symbols and admins
+     */
+    function getCommunities() external view returns (CommunityToken[] memory, string[] memory, string[] memory, address[] memory) {
+        string[] memory names = new string[](communities.length);
+        string[] memory symbols = new string[](communities.length);
+        address[] memory admins = new address[](communities.length);
+        for (uint256 i = 0; i < communities.length; i++) {
+            names[i] = communities[i].name();
+            symbols[i] = communities[i].symbol();
+            admins[i] = communityAdmins[communities[i]];
+        }
+        return (communities, names, symbols, admins);
+    }
+
     //////////////////////////////////////
     // Private Functions                //
     //////////////////////////////////////
@@ -146,6 +175,7 @@ contract CommunityRegistry is Ownable {
     function _deployCommunityContract(string memory name, string memory symbol) private returns (CommunityToken community) {
         community = new CommunityToken(name, symbol, address(this));
         communitiesByAdmin[msg.sender].push(community);
+        communityAdmins[community] = msg.sender;
         communities.push(community); // not an efficient way to track communities, but acceptable until subgraphs are implemented
         emit CommunityDeployed(community, msg.sender);
     }
