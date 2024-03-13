@@ -50,10 +50,10 @@ address constant COMMUNITY_REGISTRY_ADDRESS = 0xd359AA2364b1F3716dc1CC96bb2Fa4ef
     forge verify-contract \
     --chain-id 11155111 \
     --watch \
-    --constructor-args $(cast abi-encode "constructor(string,string,address)" "Penalty Game" "PG" 0xd359AA2364b1F3716dc1CC96bb2Fa4ef19bc97d4) \
+    --constructor-args $(cast abi-encode "constructor(string,string,address)" "Penalty Game" "PG" 0xc9bE2366fB425F7C1371008Ef9AD773C9AD103F2) \
     --etherscan-api-key $ETHERSCAN_API_KEY \
     --optimizer-runs 200 \
-    0x121fe9DA9be9fC948bF56F93F99c13ccb2cFE36d \
+    0xDd88659C8d77b092cd6B68459A86f33F123E2B47 \
     src/CommunityToken.sol:CommunityToken
 
     forge verify-contract \
@@ -61,16 +61,24 @@ address constant COMMUNITY_REGISTRY_ADDRESS = 0xd359AA2364b1F3716dc1CC96bb2Fa4ef
     --watch \
     --etherscan-api-key $ETHERSCAN_API_KEY \
     --optimizer-runs 200 \
-    0x4432C7E4972a84E20E1FB0D899e61287c522e2dB \
+    0xBC1dba2a6fE6eE4Ba6A886fc1BBeC09a19963cf5 \
     src/TokenPool.sol:TokenPool
 
     forge verify-contract \
     --chain-id 11155111 \
     --watch \
-    --constructor-args $(cast abi-encode "constructor(address,address)" 0x4432C7E4972a84E20E1FB0D899e61287c522e2dB 0xf13e5F8933976bfdaA31efdB10c93BE23525Ddc3) \
     --etherscan-api-key $ETHERSCAN_API_KEY \
     --optimizer-runs 200 \
-    0x1826c35d17DB4880Cc8Fe9477EC9e769F264D7A8 \
+    0x77Dcd2922138F77cc53B7296c86f297B9CC07F83 \
+    src/TokenTransferRequest.sol:TokenTransferRequest
+
+    forge verify-contract \
+    --chain-id 11155111 \
+    --watch \
+    --constructor-args $(cast abi-encode "constructor(address,address)" 0xBC1dba2a6fE6eE4Ba6A886fc1BBeC09a19963cf5 0xf13e5F8933976bfdaA31efdB10c93BE23525Ddc3) \
+    --etherscan-api-key $ETHERSCAN_API_KEY \
+    --optimizer-runs 200 \
+    0xc9bE2366fB425F7C1371008Ef9AD773C9AD103F2 \
     src/CommunityRegistry.sol:CommunityRegistry
  */
 contract DeployPenaltyGame is Script {
