@@ -41,8 +41,8 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
         tokenPool = _pool;
     }
 
-    modifier onlyCommunityAdmin(CommunityToken community, address admin) {
-        if (communityAdmins[community] != admin) revert OnlyCommunityAdmin();
+    modifier onlyCommunityAdmin(CommunityToken community) {
+        if (communityAdmins[community] != msg.sender) revert OnlyCommunityAdmin();
         _;
     }
 
@@ -99,7 +99,7 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
      * @param community The community token contract
      * @param member The address of the member to assign the token to
      */
-    function mintTokenToMember(CommunityToken community, address member) external onlyCommunityAdmin(community, msg.sender) {
+    function mintTokenToMember(CommunityToken community, address member) external onlyCommunityAdmin(community) {
         uint256 tokenId = _mintCommunityToken(community);
         _assignTokenToMember(community, member, tokenId);
     }
@@ -110,7 +110,7 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
      * @param community The community token contract
      * @return The id of the created token
      */
-    function mintCommunityToken(CommunityToken community) external onlyOwner returns (uint256){
+    function mintCommunityToken(CommunityToken community) external onlyCommunityAdmin(community) returns (uint256){
         return _mintCommunityToken(community);
     }
 
@@ -121,7 +121,7 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
      * @param community The community token contract
      * @param tokenId The id of the token to assign
      */
-    function assignTokenToMember(CommunityToken community, address member, uint256 tokenId) external onlyOwner onlyNew(community, member) {
+    function assignTokenToMember(CommunityToken community, address member, uint256 tokenId) external onlyCommunityAdmin(community) onlyNew(community, member) {
         _assignTokenToMember(community, member, tokenId);
     }
 
@@ -165,7 +165,7 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
      * @param member The address of the member to remove
      * @param community The community token contract
      */
-    function removeMemberFromCommunity(address member, CommunityToken community) external onlyOwner onlyExisting(community, member) returns (uint256){
+    function removeMemberFromCommunity(address member, CommunityToken community) external onlyCommunityAdmin(community) onlyExisting(community, member) returns (uint256){
         return _removeMemberFromCommunity(member, community);
     }
 
@@ -175,7 +175,7 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
      * @param community The community token contract
      * @param tokenId The id of the token to burn
      */
-    function burnCommunityToken(CommunityToken community, uint256 tokenId) external onlyOwner {
+    function burnCommunityToken(CommunityToken community, uint256 tokenId) external onlyCommunityAdmin(community) {
         _burnCommunityToken(community, tokenId);
     }
 
