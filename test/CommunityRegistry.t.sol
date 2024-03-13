@@ -83,11 +83,11 @@ contract CommunityRegistryTest is Test {
     function testBurnByAdmin() public createAndAssignTokenToMember {
         to = address(tokenPool);
         vm.prank(from);
-        communityToken.initiateTransferRequest(to, tokenId);
+        communityRegistry.initiateTransferRequest(communityToken, to, tokenId);
         vm.prank(approver);
-        communityToken.approveTransferRequest(tokenId);
+        communityRegistry.approveTransferRequest(communityToken, tokenId);
         vm.prank(from);
-        communityToken.completeTransferRequest(tokenId);
+        communityRegistry.completeTransferRequest(communityToken, tokenId);
 
         vm.prank(admin);
         communityRegistry.burnCommunityToken(communityToken, tokenId);
@@ -105,59 +105,60 @@ contract CommunityRegistryTest is Test {
 
     function testInitiateTransferRequest() public createAndAssignTokenToMember {
         vm.prank(from);
-        communityToken.initiateTransferRequest(to, tokenId);
+        communityRegistry.initiateTransferRequest(communityToken, to, tokenId);
     }
     
     function testApproveTransferRequest() public createAndAssignTokenToMember {
         vm.prank(from);
-        communityToken.initiateTransferRequest(to, tokenId);
+        communityRegistry.initiateTransferRequest(communityToken, to, tokenId);
         
         vm.prank(approver);
-        communityToken.approveTransferRequest(tokenId);
+        communityRegistry.approveTransferRequest(communityToken, tokenId);
     }
 
     function testCompleteTransferRequest() public createAndAssignTokenToMember {
         vm.prank(from);
-        communityToken.initiateTransferRequest(to, tokenId);
+        communityRegistry.initiateTransferRequest(communityToken, to, tokenId);
         vm.prank(approver);
-        communityToken.approveTransferRequest(tokenId);
+        communityRegistry.approveTransferRequest(communityToken, tokenId);
 
         vm.prank(from);
-        communityToken.completeTransferRequest(tokenId);
+        communityRegistry.completeTransferRequest(communityToken, tokenId);
     }
 
-    function testCompleteTransferRequestWithoutCallingComplete() public createAndAssignTokenToMember {
+    function testRevertsIfDirectlyCallsTokenContract() public createAndAssignTokenToMember {
         vm.prank(from);
-        communityToken.initiateTransferRequest(to, tokenId);
+        communityRegistry.initiateTransferRequest(communityToken, to, tokenId);
         vm.prank(approver);
-        communityToken.approveTransferRequest(tokenId);
+        communityRegistry.approveTransferRequest(communityToken, tokenId);
 
         vm.prank(from);
+        vm.expectRevert();
         communityToken.safeTransferFrom(from, to, tokenId);
     }
 
     function testCompleteTransferRequestToPool() public createAndAssignTokenToMember {
         to = address(tokenPool);
         vm.prank(from);
-        communityToken.initiateTransferRequest(to, tokenId);
+        communityRegistry.initiateTransferRequest(communityToken, to, tokenId);
         vm.prank(approver);
-        communityToken.approveTransferRequest(tokenId);
+        communityRegistry.approveTransferRequest(communityToken, tokenId);
 
         vm.prank(from);
-        communityToken.completeTransferRequest(tokenId);
+        communityRegistry.completeTransferRequest(communityToken, tokenId);
     }
 
     function testRevertTransferRequestIfNotInitiated() public createAndAssignTokenToMember {
         vm.prank(approver);
         vm.expectRevert(); // TODO: Encode revert message
-        communityToken.approveTransferRequest(tokenId);
+        communityRegistry.approveTransferRequest(communityToken, tokenId);
     }
 
     function testRevertTransferRequestIfNotApproved() public createAndAssignTokenToMember {
         vm.startPrank(from);
-        communityToken.initiateTransferRequest(to, tokenId);
+        communityRegistry.initiateTransferRequest(communityToken, to, tokenId);
         vm.expectRevert(); // TODO: Encode revert message
-        communityToken.completeTransferRequest(tokenId);
+        communityRegistry.completeTransferRequest(communityToken, tokenId);
         vm.stopPrank();
     }
 }

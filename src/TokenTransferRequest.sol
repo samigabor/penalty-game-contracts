@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 enum RequestStatus {
+    None,
     Pending,
     Approved,
     Completed
@@ -15,42 +16,45 @@ struct TransferRequest {
 
 /**
  * @title TokenTransferRequest
- * @notice The contract is used to manage token transfer state. 
+ * @notice The contract is used to manage token transfer state.
  * Only pending requests can be approved.
  * Only approved requests can be transferred.
  */
 contract TokenTransferRequest {
+    mapping(address community => mapping(uint256 => TransferRequest)) internal _transferRequests;
+    
+    event UpdateTransferRequest(uint256 indexed tokenId, RequestStatus indexed status);
 
-    mapping(uint256 => TransferRequest) internal _transferRequests;
+    error TransferToZeroAddressDenied();
+    error ApproveForYourselfDenied();
+    error CompleteForOthersDenied();
+    error NotPendingRequest();
+    error NotApprovedRequest();
 
-    event UpdateTransferRequest(uint256 tokenId, address from, address to, RequestStatus status);
+    function _initiateTransferRequest(address community, address to, uint256 tokenId) internal {
+        if (to == address(0)) revert TransferToZeroAddressDenied();
 
-    error OnlyPendingRequestCanBeApproved(uint256 tokenId, RequestStatus status);
-    error OnlyApprovedRequestCanBeCompleted(uint256 tokenId, RequestStatus status);
-    error TransferRequestNotApproved(uint256 tokenId);
-    error TransferRequestToZeroAddress();
-
-    modifier onlyApprovedRequest(uint256 tokenId) {
-        if (_transferRequests[tokenId].status != RequestStatus.Approved) {
-            revert TransferRequestNotApproved(tokenId);
-        }
-        _;
+        _transferRequests[community][tokenId].from = msg.sender;
+        _transferRequests[community][tokenId].to = to;
+        _transferRequests[community][tokenId].status = RequestStatus.Pending;
+        emit UpdateTransferRequest(tokenId, RequestStatus.Pending);
     }
 
-    function _updateRequestStatus(uint256 tokenId, RequestStatus status, address to) internal {
-        if (status == RequestStatus.Pending) {
-            if (to == address(0)) revert TransferRequestToZeroAddress();
-            _transferRequests[tokenId].from = msg.sender;
-            _transferRequests[tokenId].to = to;
-        }
-        if (status == RequestStatus.Approved && _transferRequests[tokenId].status != RequestStatus.Pending) {
-            revert OnlyPendingRequestCanBeApproved(tokenId, status);
-        }
-        if (status == RequestStatus.Completed && _transferRequests[tokenId].status != RequestStatus.Approved) {
-            revert OnlyApprovedRequestCanBeCompleted(tokenId, status);
-        }
+    function _approveTransferRequest(address community, uint256 tokenId) internal {
+        TransferRequest memory request = _transferRequests[community][tokenId];
+        if (request.from == msg.sender || request.to == msg.sender) revert ApproveForYourselfDenied();
+        if (request.status != RequestStatus.Pending) revert NotPendingRequest();
 
-        _transferRequests[tokenId].status = status;
-        emit UpdateTransferRequest(tokenId, _transferRequests[tokenId].from, _transferRequests[tokenId].to, status);
+        _transferRequests[community][tokenId].status = RequestStatus.Approved;
+        emit UpdateTransferRequest(tokenId, RequestStatus.Approved);
+    }
+
+    function _completeTransferRequest(address community, uint256 tokenId) internal {
+        TransferRequest memory request = _transferRequests[community][tokenId];
+        if (request.from != msg.sender) revert CompleteForOthersDenied();
+        if (request.status != RequestStatus.Approved) revert NotApprovedRequest();
+
+        _transferRequests[community][tokenId].status = RequestStatus.Completed;
+        emit UpdateTransferRequest(tokenId, RequestStatus.Completed);
     }
 }
