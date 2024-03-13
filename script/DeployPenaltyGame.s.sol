@@ -9,9 +9,9 @@ import {CommunityRegistry} from "../src/CommunityRegistry.sol";
 import {TokenPool} from "../src/TokenPool.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
 
+address constant COMMUNITY_REGISTRY_ADDRESS = 0xBCa974F068F5686fba05e6cA0ceC5BE6804fBB58;
 address constant COMMUNITY_TOKEN_ADDRESS = 0x1F3DA5eeFc1B23a7FB0b5AaB210d0F45Fc790C34;
 address constant TOKEN_POOL_ADDRESS = 0xBC17659eb64bB6cd10FD7A3013372D7BcbbC4fC6;
-address constant COMMUNITY_REGISTRY_ADDRESS = 0xBCa974F068F5686fba05e6cA0ceC5BE6804fBB58;
 
 // deployed but not used in this script
 // address constant TRANSFER_REQUEST_TOKEN_ADDRESS = 0x8392c3FFD7C80a4fFdaFE7F1117BAa556154b372;

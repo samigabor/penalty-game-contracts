@@ -1,15 +1,13 @@
 # Penalty Game
 
-## Architecture
+## Architecture (deployed on SEPOLIA)
 
-- [CommunityRegistry](https://sepolia.etherscan.io/address/0xc9bE2366fB425F7C1371008Ef9AD773C9AD103F2#code) contract is the gateway to the system. From here admins and members perform all actions.
-- [CommunityToken](https://sepolia.etherscan.io/address/0xDd88659C8d77b092cd6B68459A86f33F123E2B47#code) is an ERC721 contract supercharged with the approval mechanism.
-- [TokenPool](https://sepolia.etherscan.io/address/0xBC1dba2a6fE6eE4Ba6A886fc1BBeC09a19963cf5#code) contract allows burning tokens from communities
-- [TransferRequestToken](https://sepolia.etherscan.io/address/0x77Dcd2922138F77cc53B7296c86f297B9CC07F83#code) is a helper contract for the registry.
+- [CommunityRegistry](https://sepolia.etherscan.io/address/0xBCa974F068F5686fba05e6cA0ceC5BE6804fBB58#code) contract is the gateway to the system. From here admins and members perform all actions.
+- [CommunityToken](https://sepolia.etherscan.io/address/0x1F3DA5eeFc1B23a7FB0b5AaB210d0F45Fc790C34#code) is an ERC721 contract supercharged with the approval mechanism.
+- [TokenPool](https://sepolia.etherscan.io/address/0xBC17659eb64bB6cd10FD7A3013372D7BcbbC4fC6#code) contract allows burning tokens from communities
+- [TransferRequestToken](https://sepolia.etherscan.io/address/0x8392c3FFD7C80a4fFdaFE7F1117BAa556154b372#code) is a helper contract for the registry.
 
 ## Etherscan interaction:
-
-Admins will manage the communities through the Community Registry contract deployed on Sepolia at [0xc9bE2366fB425F7C1371008Ef9AD773C9AD103F2](https://sepolia.etherscan.io/address/0xc9bE2366fB425F7C1371008Ef9AD773C9AD103F2#code). 
 
 Admins can do the following:
 - create new communities: `deployCommunityContract(<name>, <symbol>)`
@@ -18,13 +16,13 @@ Admins can do the following:
 - add members to a community: `mintTokenToMember(<communityAddress>, <memberAddress>)`
 - check if a member is part of a community: `isInCommunity(<memberAddress>, <communityAddress>)`
 - remove a member from a community: `removeMemberFromCommunity(<memberAddress>, <communityAddress>)`
-- burn tokens transferred to the [TokenPool](https://sepolia.etherscan.io/address/0xBC1dba2a6fE6eE4Ba6A886fc1BBeC09a19963cf5#code) contract: `burnCommunityToken(<communityAddress>, <tokenId>)`
+- burn tokens transferred to the `TokenPool` contract: `burnCommunityToken(<communityAddress>, <tokenId>)`
 
 Members  can do the following:
 - initiate a transfer request: `initiateTransferRequest(<toAddress>, <tokenId>)`
 - approve transfer requests for other members in the community: `approveTransferRequest(<tokenId>)`
 - complete transfer requests (must be approved by another member in the community): `completeTransferRequest(<tokenId>)`
-- transfer their tokens to the [TokenPool](https://sepolia.etherscan.io/address/0xBC1dba2a6fE6eE4Ba6A886fc1BBeC09a19963cf5#code) contract, from where they can be burned by the community admin.
+- transfer their tokens to the `TokenPool` contract, from where they can be burned by the community admin.
 
 ## Security considerations
 
