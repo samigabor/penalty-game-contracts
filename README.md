@@ -1,5 +1,7 @@
 # Penalty Game
 
+## Live dApp [HERE](https://penalty-game-react.vercel.app/)
+
 ## Architecture (deployed on Polygon Mainnet)
 
 - [CommunityRegistry](https://polygonscan.com/address/0x8392c3FFD7C80a4fFdaFE7F1117BAa556154b372#code) contract is the gateway to the system. From here admins and members perform all actions.
