@@ -53,11 +53,11 @@ contract CommunityRegistryTest is Test {
     //////////////////////////////////////
 
     function testIsInCommunity() public createAndAssignTokenToMember {
-        assertEq(communityRegistry.isInCommunity(from, communityToken), true);
+        assertEq(communityRegistry.isInCommunity(communityToken, from), true);
     }
 
     function testIsNotInCommunity() public {
-        assertEq(communityRegistry.isInCommunity(from, communityToken), false);
+        assertEq(communityRegistry.isInCommunity(communityToken, from), false);
     }
 
     function testMintCommunityToken() public {
@@ -69,15 +69,15 @@ contract CommunityRegistryTest is Test {
     function testAssignTokenToMember() public createAndAssignTokenToMember {
         // member is still the owner of the token, but is in the community anymore
         assertEq(communityToken.ownerOf(tokenId), from);
-        assertEq(communityRegistry.isInCommunity(from, communityToken), true);
+        assertEq(communityRegistry.isInCommunity(communityToken, from), true);
     }
 
     function testRemoveMemberFromCommunity() public createAndAssignTokenToMember {
         vm.prank(admin);
-        communityRegistry.removeMemberFromCommunity(from, communityToken);
+        communityRegistry.removeMemberFromCommunity(communityToken, from);
         // member is still the owner of the token, but is not in the community anymore
         assertEq(communityToken.ownerOf(tokenId), from);
-        assertEq(communityRegistry.isInCommunity(from, communityToken), false);
+        assertEq(communityRegistry.isInCommunity(communityToken, from), false);
     }
 
     function testBurnByAdmin() public createAndAssignTokenToMember {

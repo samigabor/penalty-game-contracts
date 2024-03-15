@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 import {CommunityToken} from "./CommunityToken.sol";
 import {TokenPool} from "./TokenPool.sol";
-import {TokenTransferRequest} from "./TokenTransferRequest.sol";
+import {TokenTransferRequest, RequestStatus} from "./TokenTransferRequest.sol";
 
 /**
  * @title CommunityRegistry
@@ -20,10 +20,8 @@ import {TokenTransferRequest} from "./TokenTransferRequest.sol";
  */
 contract CommunityRegistry is Ownable, TokenTransferRequest {
     TokenPool public tokenPool;
-    mapping(address member => mapping(CommunityToken community => uint256 tokenId)) private memberships; // TODO: does NOT track transferred tokens/memberships
-    CommunityToken[] public communities;
-    mapping(address => CommunityToken[]) public communitiesByAdmin; // one admin can manage multiple communities
-    mapping(CommunityToken => address) public communityAdmins;
+    mapping(address member => mapping(CommunityToken community => uint256 tokenId)) private memberships;
+    mapping(CommunityToken community => address admin) public communityAdmins;
 
     event CommunityDeployed(CommunityToken community, address admin);
     event CommunityTokenMinted(CommunityToken community, uint256 tokenId);
@@ -32,12 +30,12 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
 
     error OnlyCommunityAdmin();
     error NotTheTokenOwner(address owner, address sender, uint256 tokenId);
-    error MemberAlreadyInCommunity(address member, CommunityToken community);
-    error MemberNotInCommunity(address member, CommunityToken community);
+    error MemberAlreadyInCommunity(CommunityToken community, address member);
+    error MemberNotInCommunity(CommunityToken community, address member);
     error CommunityRegistryDoesNotAcceptTokenTransfers();
     error TransferFailed(address from, address to, uint256 tokenId);
 
-    constructor(TokenPool _pool, address initialAdmin) Ownable(initialAdmin) { // address communityTemplate
+    constructor(TokenPool _pool, address initialAdmin) Ownable(initialAdmin) {
         tokenPool = _pool;
     }
 
@@ -47,12 +45,12 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
     }
 
     modifier onlyNew(CommunityToken community, address member) {
-        if (isInCommunity(member, community)) revert MemberAlreadyInCommunity(member, community);
+        if (isInCommunity(community, member)) revert MemberAlreadyInCommunity(community, member);
         _;
     }
 
     modifier onlyExisting(CommunityToken community, address member) {
-        if (!isInCommunity(member, community)) revert MemberNotInCommunity(member, community);
+        if (!isInCommunity(community, member)) revert MemberNotInCommunity(community, member);
         _;
     }
 
@@ -117,8 +115,8 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
     /**
      * @notice Assigns a token, held by the registry, to a member
      * The token ownership is transferred to the member
-     * @param member The address of the member to assign the token to
      * @param community The community token contract
+     * @param member The address of the member to assign the token to
      * @param tokenId The id of the token to assign
      */
     function assignTokenToMember(CommunityToken community, address member, uint256 tokenId) external onlyCommunityAdmin(community) onlyNew(community, member) {
@@ -134,6 +132,7 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
      */
     function initiateTransferRequest(CommunityToken community, address to, uint256 tokenId) external onlyTokenOwner(community, tokenId) {
         _initiateTransferRequest(address(community), to, tokenId);
+        _updateMemberInfoStatus(community, msg.sender, RequestStatus.Pending);
     }
 
     /**
@@ -144,6 +143,7 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
      */
     function approveTransferRequest(CommunityToken community, uint256 tokenId) external onlyExisting(community, msg.sender) {
         _approveTransferRequest(address(community), tokenId);
+        _updateMemberInfoStatus(community, _transferRequests[address(community)][tokenId].from, RequestStatus.Approved);
     }
 
     /**
@@ -156,17 +156,18 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
         _completeTransferRequest(address(community), tokenId);
         (bool success, ) = address(community).call(abi.encode(msg.sender, _transferRequests[address(community)][tokenId].to, tokenId));
         if (!success) revert TransferFailed(msg.sender, _transferRequests[address(community)][tokenId].to, tokenId);
+        _updateMemberInfoStatus(community, msg.sender, RequestStatus.Completed);
     }
 
     /**
      * @notice Removes a member from the community
      * The member is still the owner of the token. The token is not burned.
      * For burning the token, member can transfer it to the PoolToken contract
-     * @param member The address of the member to remove
      * @param community The community token contract
+     * @param member The address of the member to remove
      */
-    function removeMemberFromCommunity(address member, CommunityToken community) external onlyCommunityAdmin(community) onlyExisting(community, member) returns (uint256){
-        return _removeMemberFromCommunity(member, community);
+    function removeMemberFromCommunity(CommunityToken community, address member) external onlyCommunityAdmin(community) onlyExisting(community, member) returns (uint256){
+        return _removeMemberFromCommunity(community, member);
     }
 
     /**
@@ -185,28 +186,12 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
 
     /**
      * @notice Checks if a member is in a community
-     * @param member The address of the member
      * @param community The community token contract
+     * @param member The address of the member
      * @return True if the member is in the community, false otherwise
      */
-    function isInCommunity(address member, CommunityToken community) public view returns (bool) {
+    function isInCommunity(CommunityToken community, address member) public view returns (bool) {
         return memberships[member][community] != 0;
-    }
-
-    /**
-     * @notice Get community info
-     * @return All community token contracts, their names, symbols and admins
-     */
-    function getCommunities() external view returns (CommunityToken[] memory, string[] memory, string[] memory, address[] memory) {
-        string[] memory names = new string[](communities.length);
-        string[] memory symbols = new string[](communities.length);
-        address[] memory admins = new address[](communities.length);
-        for (uint256 i = 0; i < communities.length; i++) {
-            names[i] = communities[i].name();
-            symbols[i] = communities[i].symbol();
-            admins[i] = communityAdmins[communities[i]];
-        }
-        return (communities, names, symbols, admins);
     }
 
     //////////////////////////////////////
@@ -215,9 +200,8 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
 
     function _deployCommunityContract(string memory name, string memory symbol) private returns (CommunityToken community) {
         community = new CommunityToken(name, symbol, address(this));
-        communitiesByAdmin[msg.sender].push(community);
         communityAdmins[community] = msg.sender;
-        communities.push(community); // not an efficient way to track communities, but acceptable until subgraphs are implemented
+        communityList.push(community);
         emit CommunityDeployed(community, msg.sender);
     }
 
@@ -231,16 +215,92 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
         memberships[member][community] = tokenId;
         community.safeTransferFrom(address(this), member, tokenId);
         emit MemberAssignedToCommunity(member, community, tokenId);
+        _addMemberInfo(community, member, tokenId);
     }
 
-    function _removeMemberFromCommunity(address member, CommunityToken community) private returns (uint256){
+    function _removeMemberFromCommunity(CommunityToken community, address member) private returns (uint256){
         uint256 tokenId = memberships[member][community];
         delete memberships[member][community];
         emit MemberRemovedFromCommunity(member, community, tokenId);
+        _removeMemberInfo(community, member);
         return tokenId;
     }
 
     function _burnCommunityToken(CommunityToken community, uint256 tokenId) private {
         tokenPool.burnCommunityToken(community, tokenId);
+    }
+
+    ////////////////////////////////////////////////////////////////
+    // Temporary implementation until indexing is supported in UI //
+    ////////////////////////////////////////////////////////////////
+
+    struct CommunityInfo {
+        CommunityToken token;
+        string name;
+        string symbol;
+        address admin;
+    }
+
+    struct MemberInfo {
+        CommunityToken community;
+        uint256 tokenId;
+        RequestStatus requestStatus;
+    }
+
+    CommunityToken[] public communityList;
+    address[] public memberList;
+    mapping(address member => MemberInfo[]) public membersInfo;
+
+    /**
+     * @notice Get communities info
+     * @return All community token contracts, their names, symbols and admins
+     */
+    function getCommunitiesInfo() external view returns (CommunityInfo[] memory) {
+        uint256 length = communityList.length;
+        CommunityInfo[] memory communitiesInfo = new CommunityInfo[](length);
+        for (uint256 i = 0; i < length; i++) {
+            CommunityToken community = communityList[i];
+            communitiesInfo[i] = CommunityInfo(community, community.name(), community.symbol(), communityAdmins[community]);
+        }
+        return communitiesInfo;
+    }
+    
+    /**
+     * @notice Get members info
+     * @return All members, their community token contracts, token ids and request statuses
+     */
+    function getMembersInfo() external view returns (MemberInfo[][] memory) {
+        uint256 length = memberList.length;
+        MemberInfo[][] memory _membersInfo = new MemberInfo[][](length);
+        for (uint256 i = 0; i < length; i++) {
+            address member = memberList[i];
+            _membersInfo[i] = membersInfo[member];
+        }
+        return _membersInfo;
+    }
+
+    function _addMemberInfo(CommunityToken community, address member, uint256 tokenId) private {
+        membersInfo[member].push(MemberInfo(community, tokenId, RequestStatus.None));
+    }
+
+    function _updateMemberInfoStatus(CommunityToken community, address member, RequestStatus status) private {
+        MemberInfo[] storage _membersInfo = membersInfo[member];
+        for (uint256 i = 0; i < _membersInfo.length; i++) {
+            if (_membersInfo[i].community == community) {
+                _membersInfo[i].requestStatus = status;
+                break;
+            }
+        }
+    }
+
+    function _removeMemberInfo(CommunityToken community, address member) private {
+        MemberInfo[] storage _membersInfo = membersInfo[member];
+        for (uint256 i = 0; i < _membersInfo.length; i++) {
+            if (_membersInfo[i].community == community) {
+                _membersInfo[i] = _membersInfo[_membersInfo.length - 1];
+                _membersInfo.pop();
+                break;
+            }
+        }
     }
 }
