@@ -249,6 +249,7 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
 
     CommunityToken[] public communityList;
     address[] public memberList;
+    mapping(address member => bool) public isMemberInList;
     mapping(address member => MemberInfo[]) public membersInfo;
 
     /**
@@ -280,6 +281,10 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
     }
 
     function _addMemberInfo(CommunityToken community, address member, uint256 tokenId) private {
+        if (!isMemberInList[member]) {
+            memberList.push(member);
+            isMemberInList[member] = true;
+        }
         membersInfo[member].push(MemberInfo(community, tokenId, RequestStatus.None));
     }
 
@@ -299,6 +304,19 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
             if (_membersInfo[i].community == community) {
                 _membersInfo[i] = _membersInfo[_membersInfo.length - 1];
                 _membersInfo.pop();
+
+                // check if member is in any other communities; if he isn't, remove him from memberList
+                if (_membersInfo.length == 0) {
+                    for (uint256 j = 0; j < memberList.length; j++) {
+                        if (memberList[j] == member) {
+                            memberList[j] = memberList[memberList.length - 1];
+                            memberList.pop();
+                            isMemberInList[member] = false;
+                            break;
+                        }
+                    }
+                }
+
                 break;
             }
         }
