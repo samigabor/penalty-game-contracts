@@ -1,13 +1,13 @@
 # Penalty Game
 
-## Architecture (deployed on SEPOLIA)
+## Architecture (deployed on Polygon Mainnet)
 
-- [CommunityRegistry](https://sepolia.etherscan.io/address/0xBCa974F068F5686fba05e6cA0ceC5BE6804fBB58#code) contract is the gateway to the system. From here admins and members perform all actions.
-- [CommunityToken](https://sepolia.etherscan.io/address/0x1F3DA5eeFc1B23a7FB0b5AaB210d0F45Fc790C34#code) is an ERC721 contract supercharged with the approval mechanism.
-- [TokenPool](https://sepolia.etherscan.io/address/0xBC17659eb64bB6cd10FD7A3013372D7BcbbC4fC6#code) contract allows burning tokens from communities
-- [TransferRequestToken](https://sepolia.etherscan.io/address/0x8392c3FFD7C80a4fFdaFE7F1117BAa556154b372#code) is a helper contract for the registry.
+- [CommunityRegistry](https://polygonscan.com/address/0x8392c3FFD7C80a4fFdaFE7F1117BAa556154b372#code) contract is the gateway to the system. From here admins and members perform all actions.
+- [CommunityToken](https://polygonscan.com/address/0x07d8Cb502429483485ae3eaC4Ac8DA3E038b8b80#code) is an ERC721 contract supercharged with the approval mechanism.
+- [TokenPool](https://polygonscan.com/address/0xEa4e3Af80a3fb7d8C6fCaC9632034ab41170Da68#code) contract allows burning tokens from communities
+- [TransferRequestToken](https://polygonscan.com/address/0x2B6Bd7190eD74161C979623f9B5E6d02861Dda44#code) is a helper contract for the registry.
 
-## Etherscan interaction:
+## Blockexplorer interaction:
 
 Admins can do the following:
 - create new communities: `deployCommunityContract(<name>, <symbol>)`

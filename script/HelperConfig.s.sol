@@ -19,7 +19,10 @@ contract HelperConfig is Script {
     Config public config;
 
     constructor() {
-        if (block.chainid == 80001) {
+        if (block.chainid == 137) {
+            config = getPolygonConfig();
+            console.log("Polygon config: %s", config.deployKey);
+        } else if (block.chainid == 80001) {
             config = getMumbaiConfig();
             console.log("Mumbai config: %s", config.deployKey);
         } else if (block.chainid == 11155111) {
@@ -29,6 +32,16 @@ contract HelperConfig is Script {
             config = getOrCreateAnvilConfig();
             console.log("Anvil config: %s", config.deployKey);
         }
+    }
+
+    function getPolygonConfig() public view returns (Config memory) {
+        return Config({
+            deployKey: vm.envUint("PRIVATE_KEY"),
+            admin: 0xf13e5F8933976bfdaA31efdB10c93BE23525Ddc3,
+            from: 0x90F010Dd9408575985da1C14dBD3920BB0FFa7b6,
+            to: 0x7965f643967aB3cDe072cb45dc9AFAA08d68ABdf,
+            approver: 0x06E91E93f0ae2B12AD00C7AC430D167767Eb1085
+        });
     }
 
     function getMumbaiConfig() public view returns (Config memory) {
