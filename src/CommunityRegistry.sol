@@ -242,6 +242,7 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
     }
 
     struct MemberInfo {
+        address addr;
         CommunityToken community;
         uint256 tokenId;
         RequestStatus requestStatus;
@@ -285,7 +286,7 @@ contract CommunityRegistry is Ownable, TokenTransferRequest {
             memberList.push(member);
             isMemberInList[member] = true;
         }
-        membersInfo[member].push(MemberInfo(community, tokenId, RequestStatus.None));
+        membersInfo[member].push(MemberInfo(member, community, tokenId, RequestStatus.None));
     }
 
     function _updateMemberInfoStatus(CommunityToken community, address member, RequestStatus status) private {
