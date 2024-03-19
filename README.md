@@ -1,4 +1,4 @@
-# Penalty Game
+# Community Builder
 
 ## Live dApp [HERE](https://penalty-game-react.vercel.app/)
 
